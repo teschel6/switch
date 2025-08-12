@@ -1,7 +1,7 @@
 # switch
 
 A cli tool used for organizing and quickly switching between active projects.
-For those of use who just can't seem to work on one thing at a time.
+For those of us who just can't seem to work on one thing at a time.
 
 Sometimes switching between projects isn't as simple as `cd` you may also
 want to ...
@@ -13,7 +13,8 @@ want to ...
 - etc.
 
 Use `switch` to easily create and manage startup scripts that get your terminal 
-session and environment exactly how you need it for development. 
+session and environment exactly how you need it for development. Get rid of the
+need to muddy up your `.bashrc` with project specific things.
 
 As a bonus this may also serve as documentation for local development setup.
 
