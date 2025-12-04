@@ -35,7 +35,6 @@ def _load_user_config() -> UserConfig:
         config = UserConfig(**config)
         config.projects = [Reference(**r) for r in config.projects]
 
-        print(f"loaded projects from config {config.projects=}")
         return config
 
 
@@ -126,6 +125,13 @@ def init(name: Optional[str], directory: Optional[str]):
     add(directory)
 
 
+def switch():
+    config = _load_user_config()
+
+    for ref in config.projects:
+        print(f"{ref.name}:{ref.id}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Quickly switch between projects",
@@ -150,12 +156,15 @@ def main():
         "-d", "--directory", help="the project directory, defaults to present directory"
     )
 
+    # switch command
+    parser_switch = subparsers.add_parser("switch", help="switch projects.")
+
     args = parser.parse_args()
 
     if args.command == "init":
         init(args.name, args.directory)
     elif args.command == "switch":
-        raise NotImplementedError("switch project not implemented")
+        switch()
     elif args.command == "add":
         add(args.directory)
     elif args.command == "remove":
