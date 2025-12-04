@@ -30,22 +30,13 @@ def _load_user_config() -> UserConfig:
     config_path = _get_config_path()
 
     with open(config_path, "r") as file:
-        # TODO: read the user config into UserConfig
-        loaded = toml.load(file)
+        config = toml.load(file)
+        config["projects"] = config.get("projects", [])
+        config = UserConfig(**config)
+        config.projects = [Reference(**r) for r in config.projects]
 
-        projects = loaded.get("project")
-        projects = projects if projects is not None else []
-        projects = [
-            Reference(
-                p["id"],
-                p["name"],
-                p["directory"],
-            )
-            for p in projects
-        ]
-
-        print(f"loaded projects from config {projects=}")
-        return UserConfig(projects)
+        print(f"loaded projects from config {config.projects=}")
+        return config
 
 
 def _write_user_config(config: UserConfig):
@@ -57,7 +48,7 @@ def _write_user_config(config: UserConfig):
         # TODO: use [[array]] toml object syntax with lib
         content = ""
         for ref in config.projects:
-            content += "[[project]]\n"
+            content += "[[projects]]\n"
             content += f"id = '{ref.id}'\n"
             content += f"name = '{ref.name}'\n"
             content += f"directory = '{ref.directory}'\n"
@@ -77,18 +68,26 @@ def _load_project(directory: str) -> Project:
         raise SystemExit(error)
 
     with open(project_file, "r") as f:
-        # TODO: load directly to Project
         project = toml.load(f)
-        return Project(project["id"], project["name"])
+        return Project(**project)
 
 
 def add(directory: str):
+    cwd = os.getcwd()
+
+    if directory is None:
+        directory = cwd
+
     project = _load_project(directory)
     config = _load_user_config()
 
     ref = Reference(id=project.id, name=project.name, directory=directory)
 
     print(f"adding reference '{ref}'")
+
+    if any(ref.id == r.id for r in config.projects):
+        print(f"project '{ref.name}:{ref.id}' already added.")
+        return
 
     config.projects.append(ref)
 
@@ -98,13 +97,14 @@ def add(directory: str):
 def init(name: Optional[str], directory: Optional[str]):
     cwd = os.getcwd()
 
-    if name is None:
-        name = os.path.basename(cwd)
-
     if directory is None:
         directory = cwd
 
-    project_config = Path(cwd) / Path(PROJECT_CONFIG)
+    if name is None:
+        # TODO ignore final /
+        name = os.path.basename(directory)
+
+    project_config = Path(directory) / Path(PROJECT_CONFIG)
     print(f"{project_config=}")
 
     if project_config.exists():
@@ -142,16 +142,22 @@ def main():
         "-n", "--name", help="the project name, defaults to present directory name"
     )
 
-    args = parser.parse_args()
+    # add command
+    parser_add = subparsers.add_parser(
+        "add", help="add an existing project to user config"
+    )
+    parser_add.add_argument(
+        "-d", "--directory", help="the project directory, defaults to present directory"
+    )
 
-    print(f"{args=}")
+    args = parser.parse_args()
 
     if args.command == "init":
         init(args.name, args.directory)
     elif args.command == "switch":
         raise NotImplementedError("switch project not implemented")
     elif args.command == "add":
-        raise NotImplementedError("add project not implemented")
+        add(args.directory)
     elif args.command == "remove":
         raise NotImplementedError("add project not implemented")
 
