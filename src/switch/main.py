@@ -1,14 +1,32 @@
 import argparse
 
-from switch.project import Project, Reference, UserConfig
 from ulid import ULID
 from typing import List, Optional
 import os
 import toml
 from pathlib import Path
+from dataclasses import dataclass
 
 PROJECT_CONFIG = ".switch.toml"
 USER_CONFIG_FILE = ".config/switch/config.toml"
+
+
+@dataclass
+class Project:
+    id: str
+    name: str
+
+
+@dataclass
+class Reference:
+    id: str
+    name: str
+    directory: str
+
+
+@dataclass
+class UserConfig:
+    projects: List[Reference]
 
 
 def _get_config_path() -> Path:
@@ -17,11 +35,9 @@ def _get_config_path() -> Path:
 
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    if path.exists():
-        print(f"reading user config {path}")
-    else:
+    if not path.exists():
         path.touch()
-        print(f"user config created {path}")
+        print(f"new user config created {path}")
 
     return path
 
@@ -29,7 +45,10 @@ def _get_config_path() -> Path:
 def _load_user_config() -> UserConfig:
     config_path = _get_config_path()
 
+    print(f"reading user config {config_path}")
+
     with open(config_path, "r") as file:
+        # TODO parse file directly to config
         config = toml.load(file)
         config["projects"] = config.get("projects", [])
         config = UserConfig(**config)
@@ -42,9 +61,7 @@ def _write_user_config(config: UserConfig):
     config_path = _get_config_path()
 
     with open(config_path, "w") as file:
-        print(f"writing user config {config_path}")
-
-        # TODO: use [[array]] toml object syntax with lib
+        # TODO use [[array]] toml object syntax with lib
         content = ""
         for ref in config.projects:
             content += "[[projects]]\n"
@@ -55,6 +72,7 @@ def _write_user_config(config: UserConfig):
             content += "\n"
 
         file.write(content)
+        print(f"updated user config {config_path}")
         # toml.dump(vars(config), file)
 
 
@@ -64,6 +82,7 @@ def _load_project(directory: str) -> Project:
     if not project_file.exists():
         error = f"fatal: not a switch project, missing '{PROJECT_CONFIG}' file."
         error += "\nhint: use 'init' command to make a new project"
+        error += f"\n\nswitch init {directory}"
         raise SystemExit(error)
 
     with open(project_file, "r") as f:
@@ -72,17 +91,10 @@ def _load_project(directory: str) -> Project:
 
 
 def add(directory: str):
-    cwd = os.getcwd()
-
-    if directory is None:
-        directory = cwd
-
     project = _load_project(directory)
     config = _load_user_config()
 
     ref = Reference(id=project.id, name=project.name, directory=directory)
-
-    print(f"adding reference '{ref}'")
 
     if any(ref.id == r.id for r in config.projects):
         print(f"project '{ref.name}:{ref.id}' already added.")
@@ -93,22 +105,29 @@ def add(directory: str):
     _write_user_config(config)
 
 
-def init(name: Optional[str], directory: Optional[str]):
-    cwd = os.getcwd()
+def remove(directory: str):
+    project = _load_project(directory)
+    config = _load_user_config()
 
-    if directory is None:
-        directory = cwd
+    config.projects = [r for r in config.projects if r.id != project.id]
 
+    _write_user_config(config)
+
+    print(f"removed '{project.name}:{project.id}'")
+
+
+def init(name: Optional[str], directory: str):
     if name is None:
         # TODO ignore final /
-        name = os.path.basename(directory)
+        normalized = os.path.normpath(directory)
+        name = os.path.basename(normalized)
 
     project_config = Path(directory) / Path(PROJECT_CONFIG)
-    print(f"{project_config=}")
 
     if project_config.exists():
         error = "fatal: project already initialized"
         error += "\nhint: add and existing project to user config with 'add' command"
+        error += f"\n\nswitch add {directory}"
         raise SystemExit(error)
 
     project = Project(
@@ -128,8 +147,20 @@ def init(name: Optional[str], directory: Optional[str]):
 def switch():
     config = _load_user_config()
 
+    print("")
+
     for ref in config.projects:
         print(f"{ref.name}:{ref.id}")
+
+
+def _add_argument_directory(parser: argparse.ArgumentParser):
+    """Add the directory argment to a parser"""
+    parser.add_argument(
+        "-d",
+        "--directory",
+        help="the project directory, defaults to current working directory",
+        default=os.getcwd(),
+    )
 
 
 def main():
@@ -139,36 +170,37 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
+    # switch command
+    parser_switch = subparsers.add_parser("switch", help="switch projects.")
+
     # init command
     parser_init = subparsers.add_parser("init", help="initialize a new project")
-    parser_init.add_argument(
-        "-d", "--directory", help="the project directory, defaults to present directory"
-    )
-    parser_init.add_argument(
-        "-n", "--name", help="the project name, defaults to present directory name"
-    )
+    parser_init.add_argument("-n", "--name", help="the name of the project")
+    _add_argument_directory(parser_init)
 
     # add command
     parser_add = subparsers.add_parser(
         "add", help="add an existing project to user config"
     )
-    parser_add.add_argument(
-        "-d", "--directory", help="the project directory, defaults to present directory"
-    )
+    _add_argument_directory(parser_add)
 
-    # switch command
-    parser_switch = subparsers.add_parser("switch", help="switch projects.")
+    # rm command
+    parser_add = subparsers.add_parser("rm", help="remove project from user config")
+    _add_argument_directory(parser_add)
 
     args = parser.parse_args()
 
-    if args.command == "init":
-        init(args.name, args.directory)
-    elif args.command == "switch":
+    if args.command is None:
+        args.command = "switch"
+
+    if args.command == "switch":
         switch()
+    elif args.command == "init":
+        init(args.name, args.directory)
     elif args.command == "add":
         add(args.directory)
-    elif args.command == "remove":
-        raise NotImplementedError("add project not implemented")
+    elif args.command == "rm":
+        remove(args.directory)
 
 
 if __name__ == "__main__":
