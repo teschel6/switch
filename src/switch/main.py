@@ -6,6 +6,8 @@ import os
 import toml
 from pathlib import Path
 from dataclasses import dataclass
+import inquirer
+import subprocess
 
 PROJECT_CONFIG = ".switch.toml"
 USER_CONFIG_FILE = ".config/switch/config.toml"
@@ -68,12 +70,10 @@ def _write_user_config(config: UserConfig):
             content += f"id = '{ref.id}'\n"
             content += f"name = '{ref.name}'\n"
             content += f"directory = '{ref.directory}'\n"
-            # content += toml.dumps(vars(ref))
             content += "\n"
 
         file.write(content)
         print(f"updated user config {config_path}")
-        # toml.dump(vars(config), file)
 
 
 def _load_project(directory: str) -> Project:
@@ -88,6 +88,26 @@ def _load_project(directory: str) -> Project:
     with open(project_file, "r") as f:
         project = toml.load(f)
         return Project(**project)
+
+
+def _select_project() -> Reference:
+    # TODO: add fuzzy searching to list selection
+
+    config = _load_user_config()
+
+    query = inquirer.List(
+        "project",
+        message="select a project",
+        choices=[(p.name, p) for p in config.projects],
+    )
+    answers = inquirer.prompt([query])
+
+    if answers is None:
+        raise SystemExit("fatal: no project selected")
+
+    selected = answers["project"]
+
+    return selected
 
 
 def add(directory: str):
@@ -145,12 +165,12 @@ def init(name: Optional[str], directory: str):
 
 
 def switch():
-    config = _load_user_config()
+    selected = _select_project()
 
-    print("")
+    print(f"selected '{selected.name}' switching to '{selected.directory}'")
 
-    for ref in config.projects:
-        print(f"{ref.name}:{ref.id}")
+    os.chdir(Path(selected.directory))
+    subprocess.run(["bash"])
 
 
 def _add_argument_directory(parser: argparse.ArgumentParser):

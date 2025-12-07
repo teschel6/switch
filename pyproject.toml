@@ -8,6 +8,8 @@ dependencies = [
     "python-ulid",
     "toml",
     "typing-extensions",
+    "inquirer",
+    "textual",
 ]
 
 [build-system]
