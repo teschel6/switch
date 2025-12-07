@@ -9,7 +9,6 @@ dependencies = [
     "toml",
     "typing-extensions",
     "inquirer",
-    "textual",
 ]
 
 [build-system]
