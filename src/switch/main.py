@@ -110,6 +110,27 @@ def _select_project() -> Reference:
     return selected
 
 
+def _executable_exists(command: str):
+    """Check if command is in PATH and executable"""
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        full_path = os.path.join(path, command)
+        if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+            return True
+
+    return False
+
+
+def _get_editior():
+    """Find the best available editor in order of preference"""
+    editors = ["nvim", "vim", "vi", "nano", "emacs"]
+
+    for editor in editors:
+        if _executable_exists:
+            return editor
+
+    raise SystemExit("fatal: no suitable text editor found")
+
+
 def add(directory: str):
     project = _load_project(directory)
     config = _load_user_config()
@@ -169,8 +190,16 @@ def switch():
 
     print(f"selected '{selected.name}' switching to '{selected.directory}'")
 
+    # TODO: find better way to open project
     os.chdir(Path(selected.directory))
     subprocess.run(["bash"])
+
+
+def config():
+    config_path = _get_config_path()
+    editor = _get_editior()
+
+    subprocess.run([editor, config_path])
 
 
 def _add_argument_directory(parser: argparse.ArgumentParser):
@@ -191,7 +220,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # switch command
-    parser_switch = subparsers.add_parser("switch", help="switch projects.")
+    subparsers.add_parser("switch", help="switch projects.")
 
     # init command
     parser_init = subparsers.add_parser("init", help="initialize a new project")
@@ -203,6 +232,9 @@ def main():
         "add", help="add an existing project to user config"
     )
     _add_argument_directory(parser_add)
+
+    # config command
+    subparsers.add_parser("config", help="open switch user config")
 
     # rm command
     parser_add = subparsers.add_parser("rm", help="remove project from user config")
@@ -221,6 +253,8 @@ def main():
         add(args.directory)
     elif args.command == "rm":
         remove(args.directory)
+    elif args.command == "config":
+        config()
 
 
 if __name__ == "__main__":
