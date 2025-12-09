@@ -2,10 +2,29 @@ from pathlib import Path
 import toml
 import os
 import inquirer
-from switch.types import UserConfig, Reference, Project
+from dataclasses import fields
+
+from switch.datatypes import UserConfig, Reference, Project
 
 PROJECT_CONFIG = ".switch.toml"
 USER_CONFIG_FILE = ".config/switch/config.toml"
+
+
+def safe_unpack(data: dict, dataclass_type):
+    """Unpack a dataclass ignoring extra or missing fields.
+
+    Args:
+        data (dict): the dictionary to be unpacked.
+        dataclass_type: a dataclass object to parse into.
+
+    Returns:
+        dataclass_type: the object parsed from dictionary.
+    """
+    field_names = [f.name for f in fields(dataclass_type)]
+
+    safe_data = {name: data.get(name, None) for name in field_names}
+
+    return dataclass_type(**safe_data)
 
 
 def get_config_path() -> Path:
@@ -27,13 +46,10 @@ def load_user_config() -> UserConfig:
     print(f"reading user config {config_path}")
 
     with open(config_path, "r") as file:
-        # TODO parse file directly to config
-        config = toml.load(file)
-        config["projects"] = config.get("projects", [])
-        config = UserConfig(**config)
-        config.projects = [Reference(**r) for r in config.projects]
-
-        return config
+        data = toml.load(file)
+        # TODO make safe_unpack recursive for dataobject fields
+        data["projects"] = [safe_unpack(r, Reference) for r in data["projects"]]
+        return safe_unpack(data, UserConfig)
 
 
 def write_user_config(config: UserConfig):
@@ -62,9 +78,10 @@ def load_project(directory: str) -> Project:
         error += f"\n\nswitch init {directory}"
         raise SystemExit(error)
 
-    with open(project_file, "r") as f:
-        project = toml.load(f)
-        return Project(**project)
+    with open(project_file, "r") as file:
+        data = toml.load(file)
+
+        return safe_unpack(data, Project)
 
 
 def select_project() -> Reference:

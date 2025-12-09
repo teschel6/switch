@@ -1,5 +1,5 @@
 from switch import utils
-from switch.types import Reference
+from switch.datatypes import Reference
 
 
 def add(directory: str):

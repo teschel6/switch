@@ -6,6 +6,7 @@ from typing import List
 class Project:
     id: str
     name: str
+    activate: List[str]
 
 
 @dataclass

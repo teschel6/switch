@@ -1,2 +1,3 @@
 id = "01KBKBT1S9J55Z1FYNVNEHC3GH"
 name = "switch"
+activate = ["source", ".venv/bin/activate"]
