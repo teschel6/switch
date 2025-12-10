@@ -60,9 +60,7 @@ def write_user_config(config: UserConfig):
         content = ""
         for ref in config.projects:
             content += "[[projects]]\n"
-            content += f"id = '{ref.id}'\n"
-            content += f"name = '{ref.name}'\n"
-            content += f"directory = '{ref.directory}'\n"
+            content += toml.dumps(vars(ref))
             content += "\n"
 
         file.write(content)
