@@ -4,6 +4,12 @@ import os
 import inquirer
 from dataclasses import fields
 
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+# from rich.prompt import Prompt
+# from rich.live import Live
+
 from switch.datatypes import UserConfig, Reference, Project
 
 PROJECT_CONFIG = ".switch.toml"
@@ -80,6 +86,40 @@ def load_project(directory: str) -> Project:
         data = toml.load(file)
 
         return safe_unpack(data, Project)
+
+
+def select_project_rich():
+    table = Table(box=None, show_header=False)
+
+    table.add_column("selected", justify="left", style="blue", no_wrap=True)
+    table.add_column("name", justify="left", style="blue", no_wrap=True)
+    table.add_column("directory", justify="left")
+    table.add_column("id", justify="left", style="bright_black")
+
+    config = load_user_config()
+
+    # with Live(table, refresh_per_second=4):
+
+    for ref in config.projects:
+        table.add_row(" ", ref.name, ref.directory, ref.id)
+
+    # example highlighted row
+    table.add_row(">", ref.name, ref.directory, style="black on white")
+
+    table_panel = Panel(table, title="projects")
+    prompt_panel = Panel(">")
+
+    console = Console()
+    console.print()
+    console.print(table_panel)
+    console.print(prompt_panel)
+
+    return None
+
+
+# used for testing select
+if __name__ == "__main__":
+    select_project_rich()
 
 
 def select_project() -> Reference:
