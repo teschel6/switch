@@ -2,11 +2,13 @@ import os
 import subprocess
 from pathlib import Path
 
+from switch.select import select_project
 from switch import utils
 
 
 def switch():
-    selected = utils.select_project()
+    config = utils.load_user_config()
+    selected = select_project(config)
     project = utils.load_project(selected.directory)
     editor = utils.get_editior()
 
@@ -23,5 +25,5 @@ def switch():
         full_command = f"{activate_cmd} && {editor} ."
         subprocess.run([shell, "-c", full_command])
     else:
-        print("opening in editor '{editor}' ...")
+        print(f"opening in editor '{editor}' ...")
         subprocess.run([editor, "."])
