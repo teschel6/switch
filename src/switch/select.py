@@ -1,6 +1,7 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from rich.text import Text
 import readchar
 from typing import Optional, List
 
@@ -21,7 +22,19 @@ def get_key() -> str:
         return "backspace"
     elif key == readchar.key.CTRL_C:
         return "ctrl_c"
+    elif key == readchar.key.ESC:
+        return "esc"
     return key
+
+
+def control_hint() -> Text:
+    """Make a styled control hint"""
+    hint = Text()
+    hint.append("↑", style="bold green")
+    hint.append(" select ", style="bold bright_white")
+    hint.append("↓", style="bold green")
+
+    return hint
 
 
 def select_project(config: UserConfig) -> Optional[Reference]:
@@ -40,7 +53,7 @@ def select_project(config: UserConfig) -> Optional[Reference]:
         """Render the current state of the UI"""
         filtered = get_filtered_projects()
 
-        table = Table(box=None, show_header=False, padding=(0, 1))
+        table = Table(box=None, show_header=False)
         table.add_column("selected", justify="left", style="blue", no_wrap=True)
         table.add_column("name", justify="left", style="blue", no_wrap=True)
         table.add_column("directory", justify="left")
@@ -57,8 +70,20 @@ def select_project(config: UserConfig) -> Optional[Reference]:
         if not filtered:
             table.add_row("", "No matching projects", "", "", style="bright_black")
 
-        table_panel = Panel(table, title="[bold]Projects[/bold]")
-        prompt_panel = Panel(f"> {filter_text}█", title="[bold]Filter[/bold]")
+        table_panel = Panel(
+            table,
+            title="[bold]Projects[/bold]",
+            height=20,
+            subtitle=control_hint(),
+            subtitle_align="left",
+            border_style="magenta",
+        )
+
+        prompt_panel = Panel(
+            f"> {filter_text}█",
+            title="[bold]Filter[/bold]",
+            border_style="magenta",
+        )
 
         console.clear()
         console.print()
@@ -84,17 +109,18 @@ def select_project(config: UserConfig) -> Optional[Reference]:
         elif key == "down":
             if filtered and selected_index < len(filtered) - 1:
                 selected_index += 1
-        elif key == "enter":
-            if filtered:
-                return filtered[selected_index]
-            return None
         elif key == "backspace":
             if filter_text:
                 filter_text = filter_text[:-1]
                 selected_index = 0
-        elif key == "ctrl_c":
+        elif key == "ctrl_c" or key == "esc":
             console.clear()
             return None
         elif key and len(key) == 1 and key.isprintable():
             filter_text += key
             selected_index = 0
+        elif key == "enter":
+            console.clear()
+            if filtered:
+                return filtered[selected_index]
+            return None
