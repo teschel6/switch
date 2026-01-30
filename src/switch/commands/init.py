@@ -6,6 +6,7 @@ from ulid import ULID
 
 from switch.utils import PROJECT_CONFIG
 from switch.types import Project
+from switch.commands import add
 
 from switch import commands
 
@@ -18,10 +19,9 @@ def init(name: Optional[str], directory: str):
     project_config = Path(directory) / Path(PROJECT_CONFIG)
 
     if project_config.exists():
-        error = "fatal: project already initialized"
-        error += "\nhint: add and existing project to user config with 'add' command"
-        error += f"\n\nswitch add {directory}"
-        raise SystemExit(error)
+        print("project already initialized. Adding project instead.")
+        add(directory)
+        return
 
     project = Project(
         id=str(ULID()),
