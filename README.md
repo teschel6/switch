@@ -15,11 +15,16 @@ Switch will create a project config file `.switch.toml` in each of your
 projects that you initialize. You can commit this file to your version control
 system.
 
-Switch also creates a "user" config file in your home directory, 
+```toml
+id = "01KBKBT1S9J55Z1FYNVNEHC3GH"
+name = "switch"
+activate = ["source", ".venv/bin/activate"]
+```
+Switch also creates a user config dotfile in your home directory, 
 `~/.config/switch/config`. This contains references to all your projects as well
 as any user config.
 
-# Switch Commands Quickstart 
+# Switch Quickstart 
 
 ```sh
 # open help menu
@@ -41,6 +46,6 @@ switch add
 # remove a project from your user config
 switch rm -d ~/git/sample-project
 
-# open up the switch config file ~/.config/switch/config
+# open your user config file ~/.config/switch/config
 switch config
 ```
