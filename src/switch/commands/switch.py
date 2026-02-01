@@ -9,6 +9,11 @@ from switch import utils
 def switch():
     config = utils.load_user_config()
     selected = select_project(config)
+
+    if selected is None:
+        print("Nothing selected.")
+        return
+
     project = utils.load_project(selected.directory)
     editor = utils.get_editior()
 

@@ -20,19 +20,17 @@ def get_key() -> str:
         return "enter"
     elif key in (readchar.key.BACKSPACE, readchar.key.DELETE):
         return "backspace"
-    elif key == readchar.key.CTRL_C:
-        return "ctrl_c"
-    elif key == readchar.key.ESC:
-        return "esc"
+
     return key
 
 
 def control_hint() -> Text:
     """Make a styled control hint"""
     hint = Text()
-    hint.append("↑", style="bold green")
+    hint.append("↑ / ↓", style="bold green")
     hint.append(" select ", style="bold bright_white")
-    hint.append("↓", style="bold green")
+    hint.append("^C", style="bold green")
+    hint.append(" exit ", style="bold bright_white")
 
     return hint
 
@@ -90,37 +88,39 @@ def select_project(config: UserConfig) -> Optional[Reference]:
         console.print(table_panel)
         console.print(prompt_panel)
 
-    # Main interaction loop
-    while True:
-        render_ui()
-        filtered = get_filtered_projects()
+    try:
+        # Main interaction loop
+        while True:
+            render_ui()
+            filtered = get_filtered_projects()
 
-        # Ensure selected_index is valid
-        if filtered and selected_index >= len(filtered):
-            selected_index = len(filtered) - 1
-        if selected_index < 0:
-            selected_index = 0
-
-        key = get_key()
-
-        if key == "up":
-            if filtered and selected_index > 0:
-                selected_index -= 1
-        elif key == "down":
-            if filtered and selected_index < len(filtered) - 1:
-                selected_index += 1
-        elif key == "backspace":
-            if filter_text:
-                filter_text = filter_text[:-1]
+            # Ensure selected_index is valid
+            if filtered and selected_index >= len(filtered):
+                selected_index = len(filtered) - 1
+            if selected_index < 0:
                 selected_index = 0
-        elif key == "ctrl_c" or key == "esc":
-            console.clear()
-            return None
-        elif key and len(key) == 1 and key.isprintable():
-            filter_text += key
-            selected_index = 0
-        elif key == "enter":
-            console.clear()
-            if filtered:
-                return filtered[selected_index]
-            return None
+
+            key = get_key()
+
+            if key == "up":
+                if filtered and selected_index > 0:
+                    selected_index -= 1
+            elif key == "down":
+                if filtered and selected_index < len(filtered) - 1:
+                    selected_index += 1
+            elif key == "backspace":
+                if filter_text:
+                    filter_text = filter_text[:-1]
+                    selected_index = 0
+            elif key == "esc":
+                return None
+            elif key and len(key) == 1 and key.isprintable():
+                filter_text += key
+                selected_index = 0
+            elif key == "enter":
+                console.clear()
+                if filtered:
+                    return filtered[selected_index]
+                return None
+    except KeyboardInterrupt:
+        return None
