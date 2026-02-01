@@ -1,46 +1,45 @@
 # switch
 
-A cli tool used for organizing and quickly switching between active projects.
-For those of us who just can't seem to work on one thing at a time.
+Switch is a cli tool used for organizing and quickly switching between active 
+projects. For those of us who just can't seem to work on one thing at a time.
 
-Sometimes switching between projects isn't as simple as `cd` you may also
-want to ...
+Use `switch` to easily create and manage projects in an IDE agnostic way ... 
 
-- set environment variables
-- start a container
-- initalize a virtual environment
-- activate a background process
-- etc.
+- Create scripts that get your terminal session and environment exactly how 
+you need it for development. 
+- Open your project in your preferred editor/program.
 
-Use `switch` to easily create and manage startup scripts that get your terminal 
-session and environment exactly how you need it for development. Get rid of the
-need to muddy up your `.bashrc` with project specific things.
+# How it Works
 
-As a bonus this may also serve as documentation for local development setup.
+Switch will create a project config file `.switch.toml` in each of your 
+projects that you initialize. You can commit this file to your version control
+system.
 
-# Usage - WIP
+Switch also creates a "user" config file in your home directory, 
+`~/.config/switch/config`. This contains references to all your projects as well
+as any user config.
 
-Brainstorming the usage of switch tool
+# Switch Commands Quickstart 
 
 ```sh
-# open a searchable list of projects to open
-switch 
+# open help menu
+switch --help
+switch init --help
 
-# open a project (with tab completion)
-switch [project]
-
-# initalize working directory as root of a new project
-#  - creates .switch config file or directory
+# initalize current working directory as new project
 switch init
 
-# add a project with and existing .switch config to your active projects
+# initalize directory as root of a new project
+switch init -d ~/git/my-project
+
+# open a searchable list of projects to switch too
+switch 
+
+# add a project with and existing `.switch.toml` config
 switch add
 
-# open a searchable list of projects to remove
-switch remove
-
-# remove a project (with tab completion)
-switch remove [project]
+# remove a project from your user config
+switch rm -d ~/git/sample-project
 
 # open up the switch config file ~/.config/switch/config
 switch config
