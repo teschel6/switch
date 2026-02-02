@@ -5,7 +5,7 @@ import toml
 from ulid import ULID
 
 from switch.utils import PROJECT_CONFIG
-from switch.types import Project
+from switch.datatypes import Project
 from switch.commands import add
 
 from switch import commands
@@ -26,6 +26,7 @@ def init(name: Optional[str], directory: str):
     project = Project(
         id=str(ULID()),
         name=name,
+        activate=[],
     )
 
     print(f"initialized new project {project.name}:{project.id} in {project_config}")
