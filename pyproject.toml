@@ -1,6 +1,6 @@
 [project]
 name = "switch"
-version = "0.7.6"
+version = "0.7.7"
 description = "A program to switch between projects"
 requires-python = ">=3.11"
 dependencies = [

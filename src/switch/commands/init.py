@@ -16,6 +16,8 @@ def init(name: Optional[str], directory: str):
         normalized = os.path.normpath(directory)
         name = os.path.basename(normalized)
 
+    directory = os.path.abspath(directory)
+
     project_config = Path(directory) / Path(PROJECT_CONFIG)
 
     if project_config.exists():

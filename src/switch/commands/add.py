@@ -1,8 +1,10 @@
+import os
 from switch import utils
 from switch.datatypes import Reference
 
 
 def add(directory: str):
+    directory = os.path.abspath(directory)
     project = utils.load_project(directory)
     config = utils.load_user_config()
 
