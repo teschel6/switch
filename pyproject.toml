@@ -9,6 +9,7 @@ dependencies = [
     "toml",
     "typing-extensions",
     "rich",
+    "readchar",
 ]
 
 [build-system]
