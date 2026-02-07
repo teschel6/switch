@@ -34,6 +34,12 @@ def main():
         "add", help="add an existing project to user config"
     )
     _add_argument_directory(parser_add)
+    parser_add.add_argument(
+        "-r",
+        "--recursive",
+        help="recursively search for and add all projects in directory",
+        action="store_true",
+    )
 
     # config command
     subparsers.add_parser("config", help="open switch user config")
@@ -52,7 +58,7 @@ def main():
     elif args.command == "init":
         commands.init(args.name, args.directory)
     elif args.command == "add":
-        commands.add(args.directory)
+        commands.add(args.directory, args.recursive)
     elif args.command == "rm":
         commands.rm(args.directory)
     elif args.command == "config":
