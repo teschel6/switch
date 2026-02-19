@@ -20,7 +20,7 @@ def switch():
     print(f"selected '{selected.name}' switching to '{selected.directory}'")
     os.chdir(Path(selected.directory))
 
-    if project.activate is not None:
+    if project.activate is not None and len(project.activate) > 0:
         shell = os.environ.get("SHELL", "/bin/bash")
         activate_cmd = " ".join(project.activate)
 
