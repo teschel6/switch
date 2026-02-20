@@ -9,7 +9,7 @@ Use `switch` to easily create and manage projects in an IDE agnostic way ...
 you need it for development. 
 - Open your project in your preferred editor/program.
 
-<img width="1261" height="688" alt="switch_screenshot" src="https://github.com/user-attachments/assets/92cedc52-8c97-4675-85d3-d39bc60f6a82" />
+![demo](https://github.com/user-attachments/assets/f4b93037-f2da-4e34-8d51-513b5332edc6)
 
 
 # How it Works
