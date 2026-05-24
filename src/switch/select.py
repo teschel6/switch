@@ -4,6 +4,7 @@ from rich.table import Table
 from rich.text import Text
 import readchar
 from typing import Optional, List
+from importlib import metadata
 
 from switch.datatypes import UserConfig, Reference
 
@@ -70,7 +71,7 @@ def select_project(config: UserConfig) -> Optional[Reference]:
 
         table_panel = Panel(
             table,
-            title="[bold]Projects[/bold]",
+            title=f"[bold]Projects v{metadata.version('switch')}[/bold]",
             height=20,
             subtitle=control_hint(),
             subtitle_align="left",

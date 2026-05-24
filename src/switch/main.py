@@ -21,6 +21,9 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
+    # version command
+    subparsers.add_parser("version", help="display switch version")
+
     # switch command
     subparsers.add_parser("switch", help="switch projects.")
 
@@ -50,10 +53,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command is None:
-        args.command = "switch"
-
-    if args.command == "switch":
+    if args.command is None or args.command == "switch":
         commands.switch()
     elif args.command == "init":
         commands.init(args.name, args.directory)
@@ -63,6 +63,8 @@ def main():
         commands.rm(args.directory)
     elif args.command == "config":
         commands.config()
+    elif args.command == "version":
+        commands.version()
 
 
 if __name__ == "__main__":
