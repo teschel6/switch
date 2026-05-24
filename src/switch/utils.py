@@ -45,9 +45,9 @@ def load_user_config() -> UserConfig:
 
     with open(config_path, "r") as file:
         data = toml.load(file)
-        # TODO make safe_unpack recursive for dataobject fields
-        if data is not None and data["projects"] is not None:
-            data["projects"] = [safe_unpack(r, Reference) for r in data["projects"]]
+        projects = data.get("projects", [])
+        if data is not None and projects:
+            data["projects"] = [safe_unpack(r, Reference) for r in projects]
         return safe_unpack(data, UserConfig)
 
 
