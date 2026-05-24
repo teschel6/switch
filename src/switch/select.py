@@ -58,16 +58,17 @@ def select_project(config: UserConfig) -> Optional[Reference]:
         table.add_column("directory", justify="left")
         table.add_column("id", justify="left", style="bright_black")
 
-        for i, ref in enumerate(filtered):
-            if i == selected_index:
-                table.add_row(
-                    ">", ref.name, ref.directory, ref.id, style="black on white"
-                )
-            else:
-                table.add_row(" ", ref.name, ref.directory, ref.id)
+        if filtered is not None:
+            for i, ref in enumerate(filtered):
+                if i == selected_index:
+                    table.add_row(
+                        ">", ref.name, ref.directory, ref.id, style="black on white"
+                    )
+                else:
+                    table.add_row(" ", ref.name, ref.directory, ref.id)
 
         if not filtered:
-            table.add_row("", "No matching projects", "", "", style="bright_black")
+            table.add_row("", "No projects", "", "", style="bright_black")
 
         table_panel = Panel(
             table,
