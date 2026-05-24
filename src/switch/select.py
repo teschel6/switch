@@ -68,12 +68,14 @@ def select_project(config: UserConfig) -> Optional[Reference]:
                     table.add_row(" ", ref.name, ref.directory, ref.id)
 
         if not filtered:
-            table.add_row("", "No projects", "", "", style="bright_black")
+            table.add_row("", "No projects found.", "", "", style="bright_black")
+
+        # add some bottom margin
+        table.add_row()
 
         table_panel = Panel(
             table,
             title=f"[bold]Projects v{metadata.version('switch')}[/bold]",
-            height=20,
             subtitle=control_hint(),
             subtitle_align="left",
             border_style="magenta",

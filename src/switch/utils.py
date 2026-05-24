@@ -45,6 +45,10 @@ def load_user_config() -> UserConfig:
 
     with open(config_path, "r") as file:
         data = toml.load(file)
+
+        if data is None or not data:
+            return UserConfig(projects=[])
+
         projects = data.get("projects", [])
         if data is not None and projects:
             data["projects"] = [safe_unpack(r, Reference) for r in projects]
