@@ -1,15 +1,15 @@
 [project]
 name = "switch"
-version = "0.9.4"
+version = "0.9.5"
 description = "A program to switch between projects"
 requires-python = ">=3.12"
 dependencies = [
-    "argparse",
     "python-ulid",
     "toml",
     "typing-extensions",
     "rich",
     "readchar",
+    "cyclopts>=4.16.0",
 ]
 
 [build-system]
